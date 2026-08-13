@@ -359,7 +359,7 @@ timeline
 ## 🔗 Links
 
 - **GitHub:** [github.com/Anurag13075/daisycode](https://github.com/Anurag13075/daisycode)
-- **X (Twitter):** [@AnuragShar74342](https://x.com/AnuragShar74342/status/2087897945320665182)
+- **X (Twitter):** [@AnuragShar74342](https://x.com/AnuragShar74342/status/2087905455184171483?s=20)
 
 ---
 
