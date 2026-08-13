@@ -7,7 +7,7 @@ Terminal AI coding agent. Plan and build inside your local project with free-tie
 - Bun
 - OpenTUI + React CLI
 - Hono API
-- Prisma + PostgreSQL
+- Prisma + local SQLite
 - AI SDK + OpenCode Zen / xAI Grok / Cerebras
 
 ## Features
@@ -23,11 +23,12 @@ Terminal AI coding agent. Plan and build inside your local project with free-tie
 ## Prerequisites
 
 - [Bun](https://bun.sh) installed
-- PostgreSQL database (e.g. [Neon](https://neon.tech))
 - At least **one** provider API key:
   - [OpenCode Zen](https://opencode.ai/zen), and/or
   - [xAI Grok](https://console.x.ai), and/or
   - [Cerebras](https://cloud.cerebras.ai)
+
+Sessions are stored in a local SQLite file automatically. No Postgres/Neon setup is required.
 
 ## Install
 
@@ -47,13 +48,15 @@ Fill in:
 
 ```bash
 API_URL=http://localhost:3000
-DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
 
-# Use any combination — only one is required
+# Use any combination — only one is required for chat
 OPENCODE_API_KEY=
 XAI_API_KEY=
 CEREBRAS_API_KEY=
 ```
+
+`DATABASE_URL` is optional. By default DaisyCode uses
+`packages/database/prisma/daisycode.db`.
 
 DaisyCode starts as long as **at least one** of those keys is set:
 
@@ -67,10 +70,11 @@ DaisyCode starts as long as **at least one** of those keys is set:
 ## Database
 
 ```bash
-bun run --cwd packages/database db:generate
+bun run db:generate
+bun run db:push
 ```
 
-Apply the Prisma schema to your Postgres database (for example `bunx prisma db push` from `packages/database`).
+`bun run dev:server` also runs `db:push` automatically.
 
 ## Run
 
@@ -104,7 +108,8 @@ daisycode
 | `bun run build:cli` | Build the CLI package |
 | `bun run build:server` | Build the server package |
 | `bun run link:cli` | Build and link the `daisycode` executable |
-| `bun run --cwd packages/database db:generate` | Generate Prisma client |
+| `bun run db:generate` | Generate Prisma client |
+| `bun run db:push` | Create/update the local SQLite database |
 
 ## Project structure
 

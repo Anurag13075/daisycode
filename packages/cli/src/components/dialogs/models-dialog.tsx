@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import { useDialog } from "../../providers/dialog";
 import { DialogSearchList } from "../dialog-search-list";
 import { findSupportedChatModel, type SupportedChatModelId } from "@daisycode/shared";
-import { useTheme } from "../../providers/theme";
 import { usePromptConfig } from "../../providers/prompt-config";
 
 type ModelsDialogContentProps = {
@@ -10,19 +9,12 @@ type ModelsDialogContentProps = {
   onSelectModel: (modelId: SupportedChatModelId) => void;
 };
 
-function providerReadyLabel(
-  provider: "opencode" | "grok" | "cerebras",
-  ready: boolean,
-) {
-  if (ready) return "ready";
-  switch (provider) {
-    case "opencode":
-      return "needs OPENCODE_API_KEY";
-    case "grok":
-      return "needs XAI_API_KEY";
-    case "cerebras":
-      return "needs CEREBRAS_API_KEY";
-  }
+function formatModelLine(modelId: SupportedChatModelId, ready: boolean) {
+  const model = findSupportedChatModel(modelId);
+  const label = model?.label ?? modelId;
+  const provider = model?.provider ?? "unknown";
+  const status = ready ? "ready" : "no key";
+  return `${label}  [${provider}/${status}]`;
 }
 
 export const ModelsDialogContent = ({
@@ -30,7 +22,6 @@ export const ModelsDialogContent = ({
   onSelectModel,
 }: ModelsDialogContentProps) => {
   const dialog = useDialog();
-  const { colors } = useTheme();
   const { providers } = usePromptConfig();
 
   const handleSelect = useCallback(
@@ -60,17 +51,9 @@ export const ModelsDialogContent = ({
         const model = findSupportedChatModel(modelId);
         const ready = model ? providers[model.provider] : false;
         return (
-          <box flexDirection="row" gap={1} overflow="hidden">
-            <text selectable={false} fg={isSelected ? "black" : colors.primary}>
-              {model?.label ?? modelId}
-            </text>
-            <text selectable={false} fg={isSelected ? "black" : "gray"}>
-              {model?.provider ?? "?"} ·{" "}
-              {model
-                ? providerReadyLabel(model.provider, ready)
-                : "unknown"}
-            </text>
-          </box>
+          <text selectable={false} fg={isSelected ? "black" : "white"}>
+            {formatModelLine(modelId, ready)}
+          </text>
         );
       }}
       getKey={(modelId) => modelId}

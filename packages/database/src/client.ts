@@ -1,18 +1,30 @@
 import dotenv from "dotenv";
 import path from "path";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { PrismaClient } from "../generated/prisma/client.ts";
 
 dotenv.config({
   path: path.resolve(import.meta.dirname, "../../../.env"),
+  quiet: true,
 });
 
-const databaseUrl = process.env.DATABASE_URL;
+const defaultDatabaseUrl = `file:${path.resolve(import.meta.dirname, "../prisma/daisycode.db")}`;
+const databaseUrl = process.env.DATABASE_URL?.trim() || defaultDatabaseUrl;
 
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL is not set");
+const adapter = new PrismaLibSql({
+  url: databaseUrl,
+});
+
+const globalForPrisma = globalThis as unknown as {
+  daisycodePrisma?: PrismaClient;
+};
+
+export const db =
+  globalForPrisma.daisycodePrisma ??
+  new PrismaClient({
+    adapter,
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.daisycodePrisma = db;
 }
-
-const adapter = new PrismaPg({ connectionString: databaseUrl });
-
-export const db = new PrismaClient({ adapter });

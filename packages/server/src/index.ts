@@ -24,7 +24,11 @@ app.onError((error, c) => {
   }
 
   console.error("Unhandled server error", error);
-  return c.json({ error: "Internal server error" }, 500);
+  const message =
+    error instanceof Error && error.message
+      ? error.message
+      : "Internal server error";
+  return c.json({ error: message }, 500);
 });
 
 app.get("/health", (c) => {
@@ -61,5 +65,10 @@ app.get("/providers", (c) => {
 const routes = app.route("/sessions", sessions).route("/chat", chat);
 
 export type AppType = typeof routes;
+
+console.log(
+  `[DaisyCode] providers: ${JSON.stringify(getProviderAvailability())} default=${getConfiguredDefaultModelId()}`,
+);
+
 // idleTimeout must be high, otherwise LLM tool calls might not complete
 export default { port: 3000, fetch: app.fetch, idleTimeout: 255 };
