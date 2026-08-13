@@ -1,6 +1,6 @@
 # DaisyCode
 
-Terminal AI coding agent. Plan and build inside your local project with free OpenCode models — no accounts, no billing.
+Terminal AI coding agent. Plan and build inside your local project with free-tier models — no accounts, no billing.
 
 ## Stack
 
@@ -8,7 +8,7 @@ Terminal AI coding agent. Plan and build inside your local project with free Ope
 - OpenTUI + React CLI
 - Hono API
 - Prisma + PostgreSQL
-- AI SDK + OpenCode Zen (free models only)
+- AI SDK + OpenCode Zen / xAI Grok / Cerebras
 
 ## Features
 
@@ -16,19 +16,23 @@ Terminal AI coding agent. Plan and build inside your local project with free Ope
 - **Plan and Build modes** — read-only planning or write/edit/shell tools
 - **Streaming responses** — persisted session history
 - **Local project tools** — read, list, glob, grep, write, edit, bash
-- **Free models only** — OpenCode Zen free tier (DeepSeek Flash Free, MiMo Free, Nemotron Ultra Free, Laguna Free, Big Pickle)
+- **Multi-provider free tier** — OpenCode Zen, Grok (xAI), and Cerebras
+- **Bring your own keys** — run with any one provider key, or mix them
 - **No auth / no payments** — works immediately without an account
 
 ## Prerequisites
 
 - [Bun](https://bun.sh) installed
 - PostgreSQL database (e.g. [Neon](https://neon.tech))
-- Free [OpenCode Zen](https://opencode.ai/zen) API key
+- At least **one** provider API key:
+  - [OpenCode Zen](https://opencode.ai/zen), and/or
+  - [xAI Grok](https://console.x.ai), and/or
+  - [Cerebras](https://cloud.cerebras.ai)
 
 ## Install
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Anurag13075/daisycode.git
 cd daisycode
 bun install
 ```
@@ -44,10 +48,21 @@ Fill in:
 ```bash
 API_URL=http://localhost:3000
 DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
-OPENCODE_API_KEY=your-opencode-zen-api-key
+
+# Use any combination — only one is required
+OPENCODE_API_KEY=
+XAI_API_KEY=
+CEREBRAS_API_KEY=
 ```
 
-Get `OPENCODE_API_KEY` from [OpenCode Zen](https://opencode.ai/zen) (sign in and copy your API key). Free models do not require paid credits.
+DaisyCode starts as long as **at least one** of those keys is set:
+
+| Situation | What happens |
+|-----------|--------------|
+| Only `OPENCODE_API_KEY` | OpenCode free models work |
+| Only `XAI_API_KEY` (or `GROK_API_KEY`) | Grok models work |
+| Only `CEREBRAS_API_KEY` | Cerebras models work |
+| Multiple keys | All matching models are available; default prefers OpenCode → Grok → Cerebras |
 
 ## Database
 
@@ -106,13 +121,13 @@ packages/
 | Package | Description |
 |---------|-------------|
 | `@daisycode/cli` | Terminal UI and local tool execution |
-| `@daisycode/server` | Hono API and OpenCode streaming |
+| `@daisycode/server` | Hono API and multi-provider streaming |
 | `@daisycode/database` | Prisma client and schema |
 | `@daisycode/shared` | Shared Zod schemas, tools, free models |
 
 ## Free models
 
-The model selector includes only:
+### OpenCode Zen (`OPENCODE_API_KEY`)
 
 - `opencode/deepseek-v4-flash-free`
 - `opencode/mimo-v2.5-free`
@@ -120,7 +135,19 @@ The model selector includes only:
 - `opencode/laguna-s-2.1-free`
 - `opencode/big-pickle`
 
-Default model: `opencode/deepseek-v4-flash-free`.
+### Grok / xAI (`XAI_API_KEY` or `GROK_API_KEY`)
+
+- `grok/grok-code-fast-1`
+- `grok/grok-3-mini`
+- `grok/grok-4-1-fast-non-reasoning`
+
+### Cerebras (`CEREBRAS_API_KEY`)
+
+- `cerebras/gpt-oss-120b`
+- `cerebras/gemma-4-31b`
+- `cerebras/llama3.1-8b`
+
+Default model is the first available provider in this order: OpenCode → Grok → Cerebras.
 
 ## CLI commands
 

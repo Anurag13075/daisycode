@@ -3,11 +3,27 @@ import { useDialog } from "../../providers/dialog";
 import { DialogSearchList } from "../dialog-search-list";
 import { findSupportedChatModel, type SupportedChatModelId } from "@daisycode/shared";
 import { useTheme } from "../../providers/theme";
+import { usePromptConfig } from "../../providers/prompt-config";
 
 type ModelsDialogContentProps = {
   models: SupportedChatModelId[];
   onSelectModel: (modelId: SupportedChatModelId) => void;
 };
+
+function providerReadyLabel(
+  provider: "opencode" | "grok" | "cerebras",
+  ready: boolean,
+) {
+  if (ready) return "ready";
+  switch (provider) {
+    case "opencode":
+      return "needs OPENCODE_API_KEY";
+    case "grok":
+      return "needs XAI_API_KEY";
+    case "cerebras":
+      return "needs CEREBRAS_API_KEY";
+  }
+}
 
 export const ModelsDialogContent = ({
   models,
@@ -15,6 +31,7 @@ export const ModelsDialogContent = ({
 }: ModelsDialogContentProps) => {
   const dialog = useDialog();
   const { colors } = useTheme();
+  const { providers } = usePromptConfig();
 
   const handleSelect = useCallback(
     (modelId: SupportedChatModelId) => {
@@ -29,26 +46,36 @@ export const ModelsDialogContent = ({
       items={models}
       onSelect={handleSelect}
       filterFn={(modelId, query) => {
-        const label = findSupportedChatModel(modelId)?.label ?? modelId;
+        const model = findSupportedChatModel(modelId);
+        const label = model?.label ?? modelId;
+        const provider = model?.provider ?? "";
         const q = query.toLowerCase();
-        return modelId.toLowerCase().includes(q) || label.toLowerCase().includes(q);
+        return (
+          modelId.toLowerCase().includes(q) ||
+          label.toLowerCase().includes(q) ||
+          provider.toLowerCase().includes(q)
+        );
       }}
       renderItem={(modelId, isSelected) => {
         const model = findSupportedChatModel(modelId);
+        const ready = model ? providers[model.provider] : false;
         return (
           <box flexDirection="row" gap={1} overflow="hidden">
             <text selectable={false} fg={isSelected ? "black" : colors.primary}>
               {model?.label ?? modelId}
             </text>
             <text selectable={false} fg={isSelected ? "black" : "gray"}>
-              {modelId}
+              {model?.provider ?? "?"} ·{" "}
+              {model
+                ? providerReadyLabel(model.provider, ready)
+                : "unknown"}
             </text>
           </box>
         );
       }}
       getKey={(modelId) => modelId}
-      placeholder="Search free models"
-      emptyText="No matching free models"
+      placeholder="Search free models (OpenCode / Grok / Cerebras)"
+      emptyText="No matching models"
     />
   );
 };

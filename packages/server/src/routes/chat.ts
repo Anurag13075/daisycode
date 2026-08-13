@@ -73,7 +73,19 @@ const app = new Hono().post("/", submitValidator, async (c) => {
 
   const startTime = Date.now();
   const tools = getToolContracts(mode);
-  const resolvedModel = resolveChatModel(model);
+
+  let resolvedModel;
+  try {
+    resolvedModel = resolveChatModel(model);
+  } catch (error) {
+    return c.json(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      400,
+    );
+  }
+
   const previousMessages = Array.isArray(session.messages)
     ? (session.messages as unknown as DaisyCodeUIMessage[])
     : [];

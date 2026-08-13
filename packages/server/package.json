@@ -11,7 +11,9 @@
     "postinstall": "bun run --cwd ../database db:generate"
   },
   "dependencies": {
+    "@ai-sdk/cerebras": "^2.0.0",
     "@ai-sdk/openai-compatible": "^1.0.28",
+    "@ai-sdk/xai": "^3.0.0",
     "@hono/zod-validator": "^0.7.6",
     "@daisycode/database": "workspace:*",
     "@daisycode/shared": "workspace:*",
