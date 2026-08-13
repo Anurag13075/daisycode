@@ -1,168 +1,207 @@
 # DaisyCode
 
-Terminal AI coding agent. Plan and build inside your local project with free-tier models — no accounts, no billing.
+![DaisyCode](./Screenshot%202026-08-13%20114444.png)
 
-## Stack
+DaisyCode is a free and open AI coding workspace designed as an alternative to OpenCode. It lets developers build, modify, debug, and understand software using natural language while focusing on free AI models.
 
-- Bun
-- OpenTUI + React CLI
-- Hono API
-- Prisma + local SQLite
-- AI SDK + OpenCode Zen / xAI Grok / Cerebras
+No mandatory authentication. No payments. No subscriptions.
 
 ## Features
 
-- **Terminal AI chat** — coding assistant in your terminal
-- **Plan and Build modes** — read-only planning or write/edit/shell tools
-- **Streaming responses** — persisted session history
-- **Local project tools** — read, list, glob, grep, write, edit, bash
-- **Multi-provider free tier** — OpenCode Zen, Grok (xAI), and Cerebras
-- **Bring your own keys** — run with any one provider key, or mix them
-- **No auth / no payments** — works immediately without an account
+- AI coding agent for natural-language development
+- Understands existing codebases
+- Creates and edits files
+- Runs terminal commands
+- Debugs and fixes errors
+- Iterates on implementation
+- Free AI model support
+- No OpenAI or Claude dependency
+- No payment system
+- No mandatory authentication
+- Developer-focused coding workspace
+- Model selection and agent workflow
 
-## Prerequisites
+## How It Works
 
-- [Bun](https://bun.sh) installed
-- At least **one** provider API key:
-  - [OpenCode Zen](https://opencode.ai/zen), and/or
-  - [xAI Grok](https://console.x.ai), and/or
-  - [Cerebras](https://cloud.cerebras.ai)
+```mermaid
+flowchart LR
+    A[Developer] --> B[DaisyCode]
+    B --> C[AI Agent]
+    C --> D[Understand Codebase]
+    D --> E[Plan]
+    E --> F[Edit Files]
+    F --> G[Run Commands]
+    G --> H{Error?}
+    H -->|Yes| C
+    H -->|No| I[Completed Task]
+```
 
-Sessions are stored in a local SQLite file automatically. No Postgres/Neon setup is required.
+The agent can inspect a project, understand the existing implementation, make changes, run commands, analyze errors, and iterate until the requested task is completed.
 
-## Install
+## Free Models
+
+DaisyCode is designed to work with free model providers instead of requiring paid OpenAI or Claude APIs.
+
+Examples include free OpenCode models such as:
+
+```
+opencode/deepseek-v4-flash-free
+opencode/mimo-v2.5-free
+opencode/nemotron-3-ultra-free
+opencode/laguna-s-2.1-free
+opencode/big-pickle
+```
+
+Model availability depends on the provider and can change over time.
+
+## How AO Was Used
+
+DaisyCode was built as a solo project for the AO Hackathon using Agent Orchestrator.
+
+AO was used throughout development for:
+
+- Project planning
+- Repository exploration
+- Feature implementation
+- File creation and editing
+- Debugging
+- Running commands
+- Testing
+- UI iteration
+- Fixing development errors
+
+AO was therefore part of the actual development process, not just included as a demonstration.
+
+## Tech Stack
+
+- React
+- TypeScript
+- Bun
+- PostgreSQL
+- Neon
+- OpenCode free models
+- Agent Orchestrator
+- Git
+
+## Project Structure
+
+```
+daisycode/
+├── packages/
+│   ├── database/
+│   ├── server/
+│   └── ...
+├── .env.example
+├── package.json
+├── bun.lock
+└── README.md
+```
+
+## Run Locally
+
+### 1. Clone
 
 ```bash
 git clone https://github.com/Anurag13075/daisycode.git
 cd daisycode
+```
+
+### 2. Install dependencies
+
+```bash
 bun install
 ```
 
-## Configure
+### 3. Create environment file
 
+**Windows (PowerShell):**
+```powershell
+Copy-Item .env.example .env
+```
+
+**macOS/Linux:**
 ```bash
 cp .env.example .env
 ```
 
-Fill in:
+### 4. Configure `.env`
 
-```bash
+```env
 API_URL=http://localhost:3000
-
-# Use any combination — only one is required for chat
+DATABASE_URL="your-postgresql-connection-string"
 OPENCODE_API_KEY=
-XAI_API_KEY=
-CEREBRAS_API_KEY=
 ```
 
-`DATABASE_URL` is optional. By default DaisyCode uses
-`packages/database/prisma/daisycode.db`.
+- Add your PostgreSQL connection string to `DATABASE_URL`.
+- `.env.example` is only a template — the application reads values from `.env`.
 
-DaisyCode starts as long as **at least one** of those keys is set:
-
-| Situation | What happens |
-|-----------|--------------|
-| Only `OPENCODE_API_KEY` | OpenCode free models work |
-| Only `XAI_API_KEY` (or `GROK_API_KEY`) | Grok models work |
-| Only `CEREBRAS_API_KEY` | Cerebras models work |
-| Multiple keys | All matching models are available; default prefers OpenCode → Grok → Cerebras |
-
-## Database
-
-```bash
-bun run db:generate
-bun run db:push
-```
-
-`bun run dev:server` also runs `db:push` automatically.
-
-## Run
-
-Terminal 1 — API:
+### 5. Start the server
 
 ```bash
 bun run dev:server
 ```
 
-API listens on `http://localhost:3000`.
+The development server runs on:
 
-Terminal 2 — CLI:
+```
+http://localhost:3000
+```
 
+## Troubleshooting
+
+**`DATABASE_URL` is not set**
+
+Make sure `.env` exists and contains:
+
+```env
+DATABASE_URL="your-postgresql-connection-string"
+```
+
+**Port 3000 is already in use**
+
+Windows:
+```powershell
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
+
+Then restart:
 ```bash
-bun run dev:cli
+bun run dev:server
 ```
 
-Or build and link the binary:
+## Security
 
-```bash
-bun run link:cli
-daisycode
-```
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `bun run dev:cli` | CLI in watch mode |
-| `bun run dev:server` | Hono server with hot reload |
-| `bun run build:cli` | Build the CLI package |
-| `bun run build:server` | Build the server package |
-| `bun run link:cli` | Build and link the `daisycode` executable |
-| `bun run db:generate` | Generate Prisma client |
-| `bun run db:push` | Create/update the local SQLite database |
-
-## Project structure
+Never commit `.env` or expose database credentials and API keys.
 
 ```
-packages/
-├── cli/        # OpenTUI + React terminal client
-├── database/   # Prisma schema and client
-├── server/     # Hono API + AI streaming
-└── shared/     # Schemas, tools, free model registry
+.env
+.env.local
 ```
 
-## Packages
+should remain private.
 
-| Package | Description |
-|---------|-------------|
-| `@daisycode/cli` | Terminal UI and local tool execution |
-| `@daisycode/server` | Hono API and multi-provider streaming |
-| `@daisycode/database` | Prisma client and schema |
-| `@daisycode/shared` | Shared Zod schemas, tools, free models |
+## Future Improvements
 
-## Free models
+- More free model providers
+- Local models through Ollama
+- Better repository indexing
+- Git integration
+- Automated testing
+- Multiple agents
+- MCP support
+- Improved agent permissions
+- Better context management
 
-### OpenCode Zen (`OPENCODE_API_KEY`)
+## Links
 
-- `opencode/deepseek-v4-flash-free`
-- `opencode/mimo-v2.5-free`
-- `opencode/nemotron-3-ultra-free`
-- `opencode/laguna-s-2.1-free`
-- `opencode/big-pickle`
+- GitHub: [github.com/Anurag13075/daisycode](https://github.com/Anurag13075/daisycode)
+- X: [@AnuragShar74342](https://x.com/AnuragShar74342/status/2087897945320665182)
 
-### Grok / xAI (`XAI_API_KEY` or `GROK_API_KEY`)
+## Author
 
-- `grok/grok-code-fast-1`
-- `grok/grok-3-mini`
-- `grok/grok-4-1-fast-non-reasoning`
+**Anurag Sharma**
 
-### Cerebras (`CEREBRAS_API_KEY`)
+DaisyCode was built independently as a solo project for the AO Hackathon.
 
-- `cerebras/gpt-oss-120b`
-- `cerebras/gemma-4-31b`
-- `cerebras/llama3.1-8b`
-
-Default model is the first available provider in this order: OpenCode → Grok → Cerebras.
-
-## CLI commands
-
-| Command | Action |
-|---------|--------|
-| `/new` | New conversation |
-| `/agents` | Switch Plan / Build |
-| `/models` | Pick a free model |
-| `/sessions` | Browse sessions |
-| `/theme` | Change theme |
-| `/exit` | Quit |
-
-Press `tab` to toggle agents. Use `@` to mention files.
+DaisyCode's goal is simple: open your project, describe what you want to build, and let a free AI coding agent help you ship it.
